@@ -1,0 +1,5 @@
+#!/bin/sh
+
+FILE="${1:-access.log}"
+
+./process_apache_log "${FILE}" $2 | ./filldb ./json_median_size

@@ -3,13 +3,15 @@
 #   All other constructs should play with /bin/sh also
 
 DB="${DB:-responses.db}"
-OUTPATH="${OUTPATH:-response_codes/}"
 
 usage() {
-  cat << EOF
-Usage: $(basename $0) process
+  cat >&2 << EOF
+Usage: $(basename $0) FORMATTER
 
 Pipe the lines in the format "CODE SIZE" to STDIN.
+
+  FORMATTER is a program that accepts CODE and VALUE as its params
+            and produces some output
 EOF
   exit 1
 }
@@ -19,16 +21,12 @@ error() {
   exit 1
 }
 
-format_output() {
-  [ -z "$2" ] && error "Usage: format_output CODE MEDIAN "
-  echo "{\"median_size\": $2}" > "${OUTPATH}/$1"
-}
-
 which sqlite3 > /dev/null || error "Cannot find 'sqlite3' executable"
 
-[ "$1" != "process" ] && usage
+[ -z "$1" ] && usage
+FORMATTER="$1"
 
-sqlite3 "${DB}" "CREATE TABLE IF NOT EXISTS timings (code TEXT, size INTEGER)"
+sqlite3 "${DB}" "CREATE TABLE IF NOT EXISTS timings (code TEXT, value INTEGER)"
 
 CODES="$( sqlite3 "${DB}" "SELECT code FROM timings GROUP BY code;" )"
 for CODE in ${CODES}; do
@@ -41,7 +39,7 @@ while read CODE SIZE; do
   export "${CODENAME}=${COUNT}"
 
   MIDDLE=$(( ${COUNT} / 2 ))
-  sqlite3 "${DB}" "INSERT INTO timings (code, size) values ('${CODE}','${SIZE}')"
-  MEDIAN="$( sqlite3 "${DB}" "SELECT size FROM timings WHERE code = ${CODE} ORDER BY size ASC LIMIT ${MIDDLE},1" )"
-  format_output "${CODE}" "${MEDIAN}"
+  sqlite3 "${DB}" "INSERT INTO timings (code, value) values ('${CODE}','${SIZE}')"
+  MEDIAN="$( sqlite3 "${DB}" "SELECT value FROM timings WHERE code = ${CODE} ORDER BY value ASC LIMIT ${MIDDLE},1" )"
+  $FORMATTER "${CODE}" "${MEDIAN}"
 done

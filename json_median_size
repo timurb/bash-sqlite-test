@@ -1,0 +1,13 @@
+#!/bin/sh
+
+OUTPATH="${OUTPATH:-response_codes/}"
+
+usage() {
+  cat >&2 << EOF
+Usage: $(basename $0) CODE MEDIAN 
+EOF
+  exit 1
+}
+
+[ -z "$2" ] && usage 
+echo "{\"median_size\": $2}" > "${OUTPATH}/$1"

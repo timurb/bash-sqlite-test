@@ -1,0 +1,16 @@
+#!/bin/sh
+
+usage() {
+  cat >&2 << EOF
+Usage: $(basename $0) access.log [COMMAND]
+
+  COMMAND is a command used to browse log, like "tail -f"
+          Default: cat
+EOF
+  exit 1
+}
+
+[ -z "$1" ] && usage
+COMMAND="${2:-cat}"
+
+${COMMAND} $1 | awk '{ print $9,$10 }' | grep -v -- '-'
