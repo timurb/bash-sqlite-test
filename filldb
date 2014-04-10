@@ -1,0 +1,20 @@
+#!/bin/sh
+
+DB="responses.db"
+
+usage() {
+  cat << EOF
+Usage: $(basename $0) process
+
+Pipe the lines in the format "CODE SIZE" to STDIN.
+EOF
+  exit 1
+}
+
+[ "$1" != "process" ] && usage
+
+sqlite3 "${DB}" "CREATE TABLE IF NOT EXISTS timings (code TEXT, size INTEGER)"
+
+while read CODE SIZE; do
+  sqlite3 "${DB}" "INSERT INTO timings (code, size) values ('${CODE}','${SIZE}')"
+done
