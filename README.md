@@ -26,7 +26,7 @@ You'll want to point your Apache/nginx root to `response_codes/` dir.
 
 #### do_processing
 
-Watches the passed file and calculates median response size from it.
+Watches the file passed as a param and calculates median response size from it.
 
 Example:
 ```
@@ -41,7 +41,7 @@ You can omit any of params:
 
 Extracts response code and response size from Apache log.
 
-Usage is the same as for `do_processing`.
+Usage is the same as for `do_processing` (see above).
 No default filename in this case.
 
 The processed output is dumped to STDOUT.
@@ -78,6 +78,5 @@ This command will create `/var/www/200` with the content `{"median_size": 1234}`
 
 ## License and Author
 
-Author:: Timur Batyrshin <erthad@gmail.com>
-License:: MIT
->>>>>>> added several helper scripts and README
+* Author:: Timur Batyrshin <erthad@gmail.com>
+* License:: MIT
