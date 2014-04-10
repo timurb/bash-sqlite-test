@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash
+#   Bash is required as the ${!var} is used here
+#   All other constructs should play with /bin/sh also
 
-DB="responses.db"
+DB="${DB:-responses.db}"
+OUTPATH="${OUTPATH:-response_codes/}"
 
 usage() {
   cat << EOF
@@ -11,10 +14,34 @@ EOF
   exit 1
 }
 
+error() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+format_output() {
+  [ -z "$2" ] && error "Usage: format_output CODE MEDIAN "
+  echo "{\"median_size\": $2}" > "${OUTPATH}/$1"
+}
+
+which sqlite3 > /dev/null || error "Cannot find 'sqlite3' executable"
+
 [ "$1" != "process" ] && usage
 
 sqlite3 "${DB}" "CREATE TABLE IF NOT EXISTS timings (code TEXT, size INTEGER)"
 
+CODES="$( sqlite3 "${DB}" "SELECT code FROM timings GROUP BY code;" )"
+for CODE in ${CODES}; do
+  export "code${CODE}=$( sqlite3 "${DB}" "SELECT COUNT(*) FROM timings WHERE code = ${CODE}" )"
+done
+
 while read CODE SIZE; do
+  CODENAME="$(echo "code${CODE}" )"
+  COUNT=$(( ${!CODENAME} + 1 ))
+  export "${CODENAME}=${COUNT}"
+
+  MIDDLE=$(( ${COUNT} / 2 ))
   sqlite3 "${DB}" "INSERT INTO timings (code, size) values ('${CODE}','${SIZE}')"
+  MEDIAN="$( sqlite3 "${DB}" "SELECT size FROM timings WHERE code = ${CODE} ORDER BY size ASC LIMIT ${MIDDLE},1" )"
+  format_output "${CODE}" "${MEDIAN}"
 done
