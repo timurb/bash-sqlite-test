@@ -6,6 +6,11 @@ quickly and easily adapted to similar puproses.
 
 Don't use it in production.
 
+* *Note:* Odd-sized collection formula is used for both odd-sized and even-sized collections 
+(see [Median](http://en.wikipedia.org/wiki/Median#Easy_explanation_of_the_sample_median) 
+for more info) thus producing sane and acceptable results which are though slightly incorrect
+from mathematical point of view.
+
 ### Requirements
 
 SQLite3 is required for the script to work.
