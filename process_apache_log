@@ -17,4 +17,8 @@ if awk -Wversion 2>&1 | grep -q mawk; then
   AWK_PARAM='-Winteractive'
 fi
 
+if [ "${COMMAND}" != 'cat' ] && awk -Wversion 2>&1 | grep -q 'GNU Awk'; then
+  echo "WARNING: GNU Awk doesn't work correctly with \`tail -f\`, use mawk instead" >&2
+fi
+
 ${COMMAND} $1 | awk "${AWK_PARAM}" '($10 != "-"){ print $9,$10 }'
