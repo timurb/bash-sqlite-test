@@ -13,4 +13,8 @@ EOF
 [ -z "$1" ] && usage
 COMMAND="${2:-cat}"
 
-${COMMAND} $1 | awk '{ print $9,$10 }' | grep -v -- '-'
+if awk -Wversion 2>&1 | grep -q mawk; then
+  AWK_PARAM='-Winteractive'
+fi
+
+${COMMAND} $1 | awk "${AWK_PARAM}" '($10 != "-"){ print $9,$10 }'
