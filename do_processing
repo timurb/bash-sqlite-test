@@ -1,5 +1,16 @@
 #!/bin/sh
 
+usage(){
+  cat >&2 << EOF
+Can't find "${FILE}"
+
+Usage: $(basename $0) LOGTOPROCESS [COMMAND]
+EOF
+  exit 1
+}
+
 FILE="${1:-access.log}"
+
+[ -r "${FILE}" ] || usage
 
 ./process_apache_log "${FILE}" $2 | ./filldb ./json_median_size
